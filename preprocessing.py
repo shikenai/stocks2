@@ -1,6 +1,7 @@
 import pandas as pd
 import os
 import datetime as dt
+import edit
 
 
 def init(df, df_date, brand_code):
@@ -19,8 +20,9 @@ def main(test=False):
     df_trades = df_trades.drop([0, 1])
     df_trades = df_trades.rename(columns={"Symbols": 'Date'})
     df_date = df_trades['Date']
-
-    df_init = init(df_trades, df_date, '4911.jp')
+    brand = '9532.jp'
+    df_init = init(df_trades, df_date, brand)
+    edit.add_columns(df_init, brand)
     if not test:
         brands_filename = 'nikkei_listed_20230314_.csv'
 
@@ -33,13 +35,11 @@ def main(test=False):
         list_brands = [b + ".jp" for b in _list_brands]
         for b in list_brands:
             temp_df = init(df_trades, df_date, b)
-            df_init = pd.concat([df_init, temp_df])
-    df_init = df_init.reset_index(drop=True)
+            # df_init = pd.concat([df_init, temp_df])
+            # df_init = df_init.reset_index(drop=True)
 
-    # # normalize
-    # rate = 1000 / df_init['Close'][0]
-    # df_init[['Close', 'Open', 'High', 'Low']] = df_init[['Close', 'Open', 'High', 'Low']] * rate
-    # volume_rate = 10000 / df_init['Volume'][0]
-    # df_init[['Volume']] = df_init[['Volume']] * volume_rate
+            edit.add_columns(temp_df, b)
+
+    # df = edit.add_columns(df_init)
 
     return df_init

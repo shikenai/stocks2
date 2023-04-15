@@ -3,25 +3,24 @@ import os
 import plotter
 
 
-def add_columns(df):
-    df = add_candle(df)
+def add_columns(df, brand):
+    df, index_list = add_bb_rsi_sc(df)
+
     col_list = ['Close', 'High', 'Low', 'Open']
     ma_list = []
-    for col in col_list:
-        df, ma_list = add_ma(df, col)
-
-    # pd.set_option('display.max_rows', 270)
+    # for col in col_list:
+    #     df, ma_list = add_ma(df, col)
+    df, ma_list = add_ma(df, 'Close')
+    pd.set_option('display.max_rows', 270)
     pd.set_option('display.max_columns', 20)
 
     df = df.dropna()
     df = df.set_index('Date')
-    plotter.plot1(df, 'Close', ma_list)
-    # plotter.plot2(df, col_list, ma_list)
-    # for col in col_list:
-    #     plotter.plot1(df, col, ma_list)
-    df.to_csv(os.path.join(os.path.join(os.getcwd(), 'data', 'test.csv')))
+    print(df.tail(3))
+    # plotter.plot1(df, 'Close', ma_list, index_list, brand)
+    # df.to_csv(os.path.join(os.path.join(os.getcwd(), 'data', 'test.csv')))
 
-    return df
+    # return df
 
 
 def add_candle(df):
@@ -36,26 +35,39 @@ def add_candle(df):
 
 
 def add_ma(df, col):
-    ma_list = [5, 10, 14, 21, 60]
-    # ma_list = [5, 20]
+    ma_list = [3, 10, 60]
     for i in ma_list:
         df[f'{col}_{str(i)}ma'] = df[col].rolling(i).mean()
-        # df[f'{str(i)}ma_diff'] = df[f'{str(i)}ma'].diff()
-        # df[f'{str(i)}ma_trend'] = df[f'{str(i)}ma_diff'].apply(lambda x: 1 if x > 0 else -1)
-        # df = df.drop([f'{str(i)}ma_diff'], axis=1)
-        # if i == ma_list[0] or i == ma_list[1]:
-        #     pass
-        # else:
-        #     df = df.drop([f'{str(i)}ma'], axis=1)
 
-    # 没
-    # df['hist_ma'] = df[f'{str(ma_list[0])}ma'] - df[f'{str(ma_list[1])}ma']
-    # for i in ma_list:
-    #     df[f'{str(i)}_hist_ma'] = df['hist_ma'].rolling(i).mean()
-    # df['acceleration_ma'] = df[f'{str(ma_list[0])}_hist_ma'] > df[f'{str(ma_list[1])}_hist_ma']
-    # df['acceleration_shifted'] = df['acceleration'].shift(-1)
-    # df['Close+acceleration'] = df['Close'] + df['acceleration_shifted']
-    # df[f'GX_{str(ma_list[0])}_{str(ma_list[1])}'] = df[f'{str(ma_list[0])}ma'] > df[f'{str(ma_list[1])}ma']
-    # df[f'GX_CA_{str(ma_list[1])}ma'] = df['Close+acceleration'] > df[f'{str(ma_list[1])}ma']
-    # df = df.drop(['High', 'Low', 'Open', 'Date'], axis=1)
     return df, ma_list
+
+
+def add_bb_rsi_sc(df, rsi_period=14, bb_period=20, bb_dev=2,
+                  index_list=('RSI', 'Upper_band', 'Lower_band', 'StochK', 'StochD')):
+    # # RSIの計算　とりあえず使わないことにしたので凍結。
+    # delta = df['Close'].diff()
+    # gain = delta.mask(delta < 0, 0)
+    # loss = -delta.mask(delta > 0, 0)
+    # avg_gain = gain.rolling(rsi_period).mean()
+    # avg_loss = loss.rolling(rsi_period).mean()
+    # rs = avg_gain / avg_loss
+    # rsi = 100 - (100 / (1 + rs))
+    # df[index_list[0]] = rsi
+
+    # ボリンジャーバンドの計算
+    rolling_mean = df['Close'].rolling(bb_period).mean()
+    rolling_std = df['Close'].rolling(bb_period).std()
+    upper_band = rolling_mean + (bb_dev * rolling_std)
+    lower_band = rolling_mean - (bb_dev * rolling_std)
+    df[index_list[1]] = upper_band
+    df[index_list[2]] = lower_band
+
+    # # ストキャスティクスの計算 とりあえず使わないことにしたので凍結。
+    # highest_high = df['High'].rolling(window=14).max()
+    # lowest_low = df['Low'].rolling(window=14).min()
+    # stoch_k = ((df['Close'] - lowest_low) / (highest_high - lowest_low)) * 100
+    # stoch_d = stoch_k.rolling(window=3).mean()
+    # df[index_list[3]] = stoch_k
+    # df[index_list[4]] = stoch_d
+
+    return df, index_list
