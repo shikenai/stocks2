@@ -13,16 +13,21 @@ def init(df, df_date, brand_code):
 
 
 def main(test=False):
-    trades_filename = 'nikkei_trades_20230408.csv'
+    trades_filename = 'nikkei_trades_20230415.csv'
     df_trades = pd.read_csv(os.path.join(os.getcwd(), 'data', trades_filename))
     new_columns = df_trades.iloc[0].tolist()
     df_trades.columns = new_columns
     df_trades = df_trades.drop([0, 1])
     df_trades = df_trades.rename(columns={"Symbols": 'Date'})
     df_date = df_trades['Date']
-    brand = '9532.jp'
+    brand = '7832.jp'
     df_init = init(df_trades, df_date, brand)
     edit.add_columns(df_init, brand)
+
+    evaluated_list = ['Close', 'High', 'Low', 'Open', 'Volume', 'Upper_band', 'Lower_band', 'Close_10ma', 'Close_60ma', 'diff_10ma', '10ma_positive', 'diff_60ma', '60ma_positive', 'brand', 'momentum', 'deviation_band_close']
+    df_buy = pd.DataFrame(columns=evaluated_list)
+    df_sell = pd.DataFrame(columns=evaluated_list)
+
     if not test:
         brands_filename = 'nikkei_listed_20230314_.csv'
 
@@ -38,8 +43,10 @@ def main(test=False):
             # df_init = pd.concat([df_init, temp_df])
             # df_init = df_init.reset_index(drop=True)
 
-            edit.add_columns(temp_df, b)
+            buy_df, sell_df = edit.add_columns(temp_df, b)
+            if not buy_df.empty:
+                df_buy = pd.concat([df_buy, buy_df])
+            elif not sell_df.empty:
+                df_sell = pd.concat([df_sell, sell_df])
 
-    # df = edit.add_columns(df_init)
-
-    return df_init
+    return df_buy, df_sell

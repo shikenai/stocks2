@@ -3,6 +3,7 @@ import japanize_matplotlib
 import seaborn as sns
 import os
 
+
 def plot1(df, target, ma_list, col_list, brand):
     target_columns = [target]
     # _col_list = list(col_list)
@@ -34,7 +35,7 @@ def plot1(df, target, ma_list, col_list, brand):
     # ax2.axhline(y=30, color='black', linestyle='--', label='RSI買い目安')
     # ax2.axhline(y=70, color='black', linestyle='--', label='RSI売り目安')
     # ax2.legend()
-    plt.savefig(os.path.join(os.getcwd(), 'img', str(brand[:4])+'.png'))
+    plt.savefig(os.path.join(os.getcwd(), 'img', str(brand[:4]) + '.png'))
 
 
 def plot2(df, col_list, ma_list):

@@ -1,6 +1,7 @@
 import pandas as pd
 import os
 import plotter
+import evaluater
 
 
 def add_columns(df, brand):
@@ -16,11 +17,28 @@ def add_columns(df, brand):
 
     df = df.dropna()
     df = df.set_index('Date')
-    print(df.tail(3))
-    # plotter.plot1(df, 'Close', ma_list, index_list, brand)
+
+    evaluated_list = ['Close', 'High', 'Low', 'Open', 'Volume', 'Upper_band', 'Lower_band', 'Close_10ma', 'Close_60ma', 'diff_10ma', '10ma_positive', 'diff_60ma', '60ma_positive', 'brand', 'momentum', 'deviation_band_close']
+    empty_df = pd.DataFrame(columns=evaluated_list)
+
+    kind, last_df = evaluater.main(df.tail(3), brand)
+    if kind == 'buy':
+        buy_df = last_df
+        sell_df = empty_df
+        plotter.plot1(df, 'Close', ma_list, index_list, brand)
+        return buy_df, sell_df
+    elif kind == 'sell':
+        buy_df = empty_df
+        sell_df = last_df
+        return buy_df, sell_df
+        plotter.plot1(df, 'Close', ma_list, index_list, brand)
+    else:
+        buy_df = empty_df
+        sell_df = empty_df
+        return buy_df, sell_df
     # df.to_csv(os.path.join(os.path.join(os.getcwd(), 'data', 'test.csv')))
 
-    # return df
+    # return buy_df, sell_df
 
 
 def add_candle(df):
@@ -35,7 +53,7 @@ def add_candle(df):
 
 
 def add_ma(df, col):
-    ma_list = [3, 10, 60]
+    ma_list = [10, 60]
     for i in ma_list:
         df[f'{col}_{str(i)}ma'] = df[col].rolling(i).mean()
 
