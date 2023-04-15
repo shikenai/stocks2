@@ -29,7 +29,7 @@ def main(test=False):
     df_sell = pd.DataFrame(columns=evaluated_list)
 
     if not test:
-        brands_filename = 'nikkei_listed_20230314_.csv'
+        brands_filename = 'nikkei_listed_20230415.csv'
 
         # ブランドデータcsvを読み込んでリスト化
         df_brands = pd.read_csv(os.path.join(os.getcwd(), 'data', brands_filename))
@@ -39,6 +39,7 @@ def main(test=False):
         _list_brands = list(df_brands['0'])
         list_brands = [b + ".jp" for b in _list_brands]
         for b in list_brands:
+            print(b)
             temp_df = init(df_trades, df_date, b)
             # df_init = pd.concat([df_init, temp_df])
             # df_init = df_init.reset_index(drop=True)

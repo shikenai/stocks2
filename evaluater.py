@@ -27,7 +27,6 @@ def main(df, brand):
         # Lb<Closeのとき、つまり、Closeが下のラインに達していないとき、deviationは負となる。この時は、まだいわゆる買いシグナルは出ていない。
         # Lb>Closeのとき、つまり、Closeが下のラインに達しているとき、deviationは正となる。この時は、すでに買いシグナルが出ている。
         last_df['deviation_band_close'] = (last_df['Lower_band'][0] - last_df['Close'][0]) / last_df['Close'][0]
-        print(list(last_df.columns))
         kind = 'sell'
         return kind, last_df
     else:
